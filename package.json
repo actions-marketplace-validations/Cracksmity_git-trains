@@ -1,9 +1,12 @@
 {
   "name": "git-trains",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.",
   "type": "module",
   "license": "MIT",
+  "bin": {
+    "git-trains": "bin/git-trains.js"
+  },
   "engines": {
     "node": ">=24"
   },
@@ -11,11 +14,29 @@
     "preview": "node scripts/serve.js",
     "sample": "node src/index.js --sample",
     "docs": "node scripts/docs.js",
-    "test": "node --test"
+    "export": "node scripts/export.js",
+    "logo": "node scripts/logo.js",
+    "community": "node scripts/community.js",
+    "leaderboard": "node scripts/leaderboard.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "lint": "eslint .",
+    "typecheck": "tsc --project tsconfig.json",
+    "check": "npm run lint && npm run typecheck && npm test && npm run check:architecture && npm run check:docs",
+    "check:architecture": "node --experimental-vm-modules --disable-warning=ExperimentalWarning scripts/checks/architecture.js",
+    "check:docs": "node scripts/checks/docs.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Cracksmity/git-trains.git"
   },
-  "homepage": "https://github.com/Cracksmity/git-trains#readme"
+  "homepage": "https://github.com/Cracksmity/git-trains#readme",
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "minimatch": "11.0.1"
+  }
 }

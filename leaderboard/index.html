@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · AI leaderboard</title>
+<meta name="description" content="Which AI built git-trains: every task the conductor handed to Codex or Antigravity, with how often each model passed its gates on the first try, how long it took and how many tokens it used.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/leaderboard/">
+<meta property="og:title" content="git-trains · AI leaderboard">
+<meta property="og:description" content="Which AI built git-trains: every task the conductor handed to Codex or Antigravity, with how often each model passed its gates on the first try, how long it took and how many tokens it used.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/leaderboard/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="stripe" aria-hidden="true"></div>
+    <nav class="eyebrow" aria-label="Site"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../studio/">studio</a> · <a href="../gallery/">gallery</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>AI leaderboard</h1>
+        <p class="pitch">Which AI built git-trains? Every task the <a href="https://github.com/Cracksmity/git-trains/tree/main/tools/conductor">conductor</a> handed to another model, scored by its own checks: how often each one passed on the first try, how long it took and how many tokens it used.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#models">See the models</a>
+        <a class="btn" href="../docs/leaderboard.json">The data (JSON)</a>
+      </div>
+    </div>
+  </header>
+
+  <noscript><p class="empty">The leaderboard is drawn in the browser from <a href="../docs/leaderboard.json">docs/leaderboard.json</a>, so it needs JavaScript.</p></noscript>
+
+  <dl class="tiles" id="tiles" aria-label="Totals"></dl>
+
+  <section id="models" aria-labelledby="models-h">
+    <header>
+      <h2 id="models-h">Models</h2>
+      <p>One row per model. Only attempts that were judged count: a run that crashed before the model did anything is not a verdict on it. With so few tasks a rate is a hint, not a ranking to bet on.</p>
+    </header>
+    <div class="bar">
+      <div class="seg" id="sort" role="group" aria-label="Sort the models by">
+        <button data-v="firstTry" aria-pressed="true">Best first try</button>
+        <button data-v="tasks" aria-pressed="false">Most tasks</button>
+        <button data-v="speed" aria-pressed="false">Fastest</button>
+        <button data-v="tokens" aria-pressed="false">Fewest tokens</button>
+      </div>
+    </div>
+    <div id="models-box" class="table-box" hidden>
+      <table class="stack models-table">
+        <caption class="sr-only">Models, with their tasks, first-try pass rate, median time, tokens, routes and fallbacks</caption>
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Tasks</th>
+            <th scope="col">First-try pass</th>
+            <th scope="col" title="Median time of the attempts that passed">Median time</th>
+            <th scope="col" title="Input plus output tokens, as each CLI reports them">Tokens</th>
+            <th scope="col">Routes</th>
+            <th scope="col">Fallbacks</th>
+          </tr>
+        </thead>
+        <tbody id="models-body"></tbody>
+      </table>
+    </div>
+    <p class="muted" id="models-state" role="status">Loading the runs…</p>
+  </section>
+
+  <section id="log" aria-labelledby="log-h">
+    <header>
+      <h2 id="log-h">Every task</h2>
+      <p>Newest first. A task run lists each attempt in order: when a model keeps failing its checks, the conductor retries it and then hands the task to the next model.</p>
+    </header>
+    <div class="bar">
+      <div class="seg" id="result" role="group" aria-label="Show">
+        <button data-v="all" aria-pressed="true">All</button>
+        <button data-v="pass" aria-pressed="false">Passed</button>
+        <button data-v="other" aria-pressed="false">Not passed</button>
+      </div>
+      <label class="tally">Model <select class="select" id="model-filter"><option value="">Any</option></select></label>
+      <span class="tally" id="tally" aria-live="polite"></span>
+    </div>
+    <div id="log-box" class="table-box" hidden>
+      <table class="stack log-table">
+        <caption class="sr-only">Every task the conductor ran, newest first</caption>
+        <thead>
+          <tr>
+            <th scope="col">Task</th>
+            <th scope="col">Attempts</th>
+            <th scope="col">Time</th>
+            <th scope="col">Tokens</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+    <button class="btn more" id="more" hidden>Show more</button>
+  </section>
+
+  <section id="medellin" aria-labelledby="medellin-h">
+    <header>
+      <h2 id="medellin-h">Before the conductor: Medellín in ten runs</h2>
+      <p>The routes start from a head-to-head: ten runs in Claude Code, Codex and Antigravity designed the same Medellín Metro train and skyline from one brief. It is the one place where the Claude models sit next to the others, because the conductor itself only drives Codex and Antigravity.</p>
+    </header>
+    <ul class="verdicts">
+      <li><a class="verdict" href="../benchmarks/medellin/#gpt-6-astra"><span class="who">GPT-6 Astra · Codex</span><h3>Most complete</h3><p>A train with all four CAF features and every landmark drawn, in 4 min 48 s. GPT-6.1 Sol did the same.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#gpt-6.1-terra"><span class="who">GPT-6.1 Terra · Codex</span><h3>Most efficient</h3><p>A 4/4 train in 2 min 13 s with 3.6k output tokens. Its skyline was incomplete.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#sonnet"><span class="who">Sonnet 5.5 · two tools</span><h3>The tool matters</h3><p>The same prompt scored 4/4 in Claude Code and 1/4 in Antigravity.</p></a></li>
+      <li><a class="verdict" href="../benchmarks/medellin/#haiku"><span class="who">Haiku 5.5 · Claude Code</span><h3>Most tokens</h3><p>81.8k output tokens, 70k of them reasoning, for a plainer train.</p></a></li>
+    </ul>
+    <div class="cta"><a class="btn" href="../benchmarks/medellin/">Read the whole benchmark</a></div>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <header>
+      <h2 id="how-h">How it is measured</h2>
+    </header>
+    <ul class="notes">
+      <li><b>A run</b> is one attempt at a task. The conductor gives the model the task, then runs the task's checks (tests, link and translation gates). If one fails, the failure goes back to the model for another try; after the allowed tries, the task climbs to the next model on its route.</li>
+      <li><b>First-try pass</b> is the share of a model's first attempts that passed every check. A model that only ever got the tasks the one before it failed will look worse than it is.</li>
+      <li><b>Crashed</b> runs, where the agent exited before doing anything (a usage limit, a CLI error), are listed in the log but not counted anywhere else.</li>
+      <li><b>Median time</b> is that of the attempts that passed. A failure that ends in seconds is not a fast job.</li>
+      <li><b>Tokens</b> are input plus output as each CLI reports them; input counts everything the model read, cache included. Reasoning tokens are reported on their own and not added again. Compare tokens within one tool.</li>
+      <li><b>Routes</b> are the kinds of task: <code>mechanical</code>, <code>design</code>, <code>research</code> and <code>bulk</code>. A dashed chip means the model only ran there as a fallback.</li>
+    </ul>
+    <p>The file keeps only the date, task id, route, backend, model, effort, attempt, pass or fail with the name of the check that failed, seconds and tokens. Never prompts, file paths or the machine's user name. To add your own runs:</p>
+    <pre class="code"><code>npm run leaderboard</code></pre>
+    <p class="muted">It merges the conductor logs of every checkout on your machine into <code>docs/leaderboard.json</code>, skipping runs it already has, so several machines can add theirs. Then open a pull request.</p>
+  </section>
+
+  <footer>
+    <a href="https://github.com/Cracksmity/git-trains/tree/main/tools/conductor">Conductor</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/scripts/leaderboard.js">scripts/leaderboard.js</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
+    <span>MIT license</span>
+  </footer>
+</div>
+
+<script type="module" src="../assets/leaderboard/app.js"></script>
+</body>
+</html>

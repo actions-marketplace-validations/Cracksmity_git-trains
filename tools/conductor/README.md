@@ -23,6 +23,8 @@ You need the CLIs installed and signed in: `codex` (`codex exec`) and/or `agy` (
 
 Every attempt is logged to `.conductor/runs.jsonl` (model, effort, seconds, input/output/reasoning tokens, pass/fail): that log is how the routes should be tuned over time.
 
+`npm run leaderboard` merges those logs, from every checkout of the repository on your machine, into [docs/leaderboard.json](../../docs/leaderboard.json), and the [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) reads that file: per model, how often it passed on the first try, its median time and tokens, the routes it served and where a ladder fell back to the next model. Only safe fields are kept (never prompts, file paths or your user name) and a run that is already in the file is skipped, so logs from several machines pile up. `npm run leaderboard -- --from <file>` adds another machine's `runs.jsonl`. After a merge conflict in the file, keep both sides and run it again.
+
 ## Routes
 
 [routes.json](routes.json) maps each kind of task to a ladder. The starting order comes from the [Medellín benchmark](../../benchmarks/medellin/), one run per model, so it is a prior, not a law:
@@ -46,7 +48,7 @@ A task is a JSON file:
   "route": "mechanical",
   "promptFile": "guides-en.md",
   "allow": ["docs/ai/**", "docs/ia/**"],
-  "gates": ["node --test test/custom.test.js", "node tools/conductor/gates/links.js docs/ai"],
+  "gates": ["node --test tests/trains/custom.test.js", "node tools/conductor/gates/links.js docs/ai"],
   "attempts": 2,
   "timeoutMin": 25
 }
@@ -67,6 +69,8 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 
 ## First runs
 
+The [AI leaderboard](https://cracksmity.github.io/git-trains/leaderboard/) has every attempt of these tasks, with its model, time, tokens and which check failed; the rows below say what happened in words.
+
 | Task | Route | What happened |
 | --- | --- | --- |
 | comments-en | mechanical | GPT-6.1-Terra passed on the first attempt: 140 s, 5.8k output tokens, 12 files |
@@ -76,6 +80,11 @@ Plus anything with an exit code: `npm test`, `node --test some.test.js`, a one-l
 | playground-style | design (custom ladder) | GPT-6.1-Terra (xhigh) restyled the playground on the first attempt in 158 s; the restyle-only gate kept its script byte for byte. One `·` came out as `?` and was fixed by hand. |
 | tunnels-art | design | GPT-6-Astra (xhigh) drew the calendar's hills and stone portals on the first attempt in 314 s. Its opaque backdrop matched only GitHub's default backgrounds, so on review the train layer was clipped instead and the backdrop dropped. |
 | calendar-docs | mechanical | GPT-6.1-Terra wrote the calendar sections of both READMEs, the changelog entry and five edge-case tests on the first attempt in 127 s. |
+| skyline-editor | design | GPT-6-Astra (xhigh) built the studio's skyline editor (580 lines: scene canvas with drag and guides, buildings list, stacked tops, pixel grid for drawn landmarks, share links) on the first attempt in 508 s, from the train editor as the model to follow. |
+| special-cars | design | GPT-6-Astra (xhigh) drew the dining, observation and mail cars on the first attempt in 202 s (7k output tokens), from a stub that fixed the contract and tests that checked round windows, a glass roof and no windows. Reviewed on six models, a one-car train and a steam train: it looks right on all of them. |
+| departures-board | design | GPT-6-Astra (xhigh) designed the split-flap departures card on the first attempt in 386 s (11k output tokens): tiles with a seam, a CSS flip that ends in the final look, reduced motion, 20 KB. It rendered its own screenshots with headless Edge. |
+| review-art | design | GPT-6-Astra (xhigh) drew the pixel art of the year in review (stat panels with a recessed LED display, the icons, hills with a hamlet, a water tank and trees, the rail with platforms and safety edges, and one station tower per month with cornice, clock, windows and door) on the first attempt in 628 s (19k output tokens), from a working baseline and a contract test (every color a tone of the five card colors, towers exactly as tall as told, nothing under the rail). Reviewed on both themes and with a steam train. |
+| regions-presets, regions-mexico, regions-new-cities | design (custom ladder) | GPT-6.1-Sol (xhigh) drew the regional countryside of eight skylines, each on the first attempt: the Osaka and New York regions in 291 s, the Mexico City and Medellín ones in 322 s, and the two new example skylines, Guadalajara and Malmö, city and countryside, in 489 s. The first launch, on GPT-6-Astra, failed in seconds with no output: the Codex account was at its usage limit. The gates ran the validator on every region (`gates/region-art.js`: enough drawings, no copies, no flat blocks) and checked that the existing skylines only gained their `region` (`gates/region-only.js`). Three runs started at the same moment collided while writing the snapshot (`git add` failed with a permission error on Windows): start parallel runs a few seconds apart. |
 
 ## Antigravity in headless mode
 

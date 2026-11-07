@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · community depot</title>
+<link rel="icon" href="../docs/favicon.svg" type="image/svg+xml">
+<meta name="description" content="Trains and skylines from people's own cities, added with a pull request. Open any of them in the studio, or add your city's metro.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/gallery/">
+<meta property="og:title" content="git-trains · community depot">
+<meta property="og:description" content="Trains and skylines from people's own cities, added with a pull request. Open any of them in the studio, or add your city's metro.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/gallery/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="stripe" aria-hidden="true"></div>
+    <nav class="eyebrow"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>Community depot</h1>
+        <p class="pitch">Trains and skylines drawn by people from their own cities, each one added with a pull request. Open any of them in the studio to make it yours, or bring the train you ride every day.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#add">Add your city</a>
+        <a class="btn" href="https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml">Request a city or train</a>
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="depot-h">
+    <h2 id="depot-h" hidden>Trains and skylines</h2>
+    <div class="bar">
+      <div class="bar-left">
+        <div class="seg" id="kind" role="group" aria-label="Show">
+          <button data-v="all" aria-pressed="true">All</button>
+          <button data-v="train" aria-pressed="false">Trains</button>
+          <button data-v="skyline" aria-pressed="false">Skylines</button>
+        </div>
+        <label class="search"><span hidden>Search</span>
+          <input id="q" type="search" placeholder="Search a city, train or author" spellcheck="false" autocomplete="off" autocapitalize="off">
+        </label>
+      </div>
+      <div class="seg" id="theme" role="group" aria-label="Scene theme">
+        <button data-v="light" aria-pressed="false">Light</button>
+        <button data-v="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+    <p class="tally" id="tally" aria-live="polite">Loading the depot…</p>
+    <div class="entries" id="entries"></div>
+    <div class="empty" id="empty" hidden>
+      <p>Nothing here matches yet. <a href="https://github.com/Cracksmity/git-trains/issues/new?template=city-request.yml">Request it</a>, or <a href="#add">draw it yourself</a>.</p>
+    </div>
+  </section>
+
+  <section id="add" aria-labelledby="add-h">
+    <header>
+      <h2 id="add-h">Add your city</h2>
+      <p>Your city's metro, the tram you take to work, the skyline outside your window: if it's real, it belongs here. You don't need to code.</p>
+    </header>
+    <ol class="steps">
+      <li>
+        <p><b>Draw it with AI.</b> Copy the instructions in the <a href="../preview/#yours">playground</a> into your AI with a photo, and paste back the JSON it writes: the playground shows it right away and lists any problems.</p>
+      </li>
+      <li>
+        <p><b>Sign it.</b> Add <code>"author"</code> (your GitHub username) and a <code>"description"</code> of the real train or city, and save it as <code>community/trains/&lt;id&gt;.json</code> (the file name is its <code>id</code>) or <code>community/skylines/&lt;city&gt;.json</code>.</p>
+      </li>
+      <li>
+        <p><b>Open a pull request.</b> A check validates it the way the Action does and draws a preview in light and dark. Once it's merged, it pulls in here. The <a href="https://github.com/Cracksmity/git-trains/blob/main/community/README.md">depot rules</a> are short: no logos or lettering, a description of the real thing, one train or skyline per pull request.</p>
+      </li>
+    </ol>
+  </section>
+
+  <footer>
+    <a href="https://github.com/Cracksmity/git-trains/tree/main/community">community/ on GitHub</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/README.es.md">README en español</a>
+    <span>MIT license</span>
+  </footer>
+</div>
+
+<script type="module" src="../assets/gallery/app.js"></script>
+</body>
+</html>

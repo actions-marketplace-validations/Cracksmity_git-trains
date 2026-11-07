@@ -1,6 +1,8 @@
-# git-trains
+<p align="center"><img src="docs/logo.svg" alt="git-trains logo" width="128" height="128"></p>
 
-[English](README.md) · **Español**
+<h1 align="center">git-trains</h1>
+
+<p align="center"><a href="README.md">English</a> · <b>Español</b></p>
 
 [![CI](https://github.com/Cracksmity/git-trains/actions/workflows/ci.yml/badge.svg)](https://github.com/Cracksmity/git-trains/actions/workflows/ci.yml)
 [![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-green.svg)](LICENSE)
@@ -16,43 +18,12 @@ Tu actividad en GitHub convertida en un **tren en pixel art**: crece con tus con
   <img alt="El calendario de contribuciones del autor hoy, recorrido por el mismo tren" src="https://raw.githubusercontent.com/Cracksmity/git-trains/output/train-calendar-light.svg">
 </picture>
 
-<sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**.</sub>
+<sub>Ese es el tren del autor hoy, con su [calendario](#modo-calendario); [el workflow de este repo](.github/workflows/train.yml) lo vuelve a dibujar cada mañana. Prueba todas las opciones en el **[playground](https://cracksmity.github.io/git-trains/preview/)**. ¿Lo quieres para un proyecto en vez de un perfil? Mira [En el README de un repositorio](#en-el-readme-de-un-repositorio).</sub>
 
-## Qué significa cada parte
-
-| Tu actividad | En el tren |
-| --- | --- |
-| Contribuciones del último año | **Vagones**, de 1 a 6 (50 / 200 / 500 / 1000 / 2000) |
-| Lenguaje principal | Una **franja** con el color oficial de ese lenguaje en GitHub |
-| Racha actual | El letrero LED **"RACHA 12"** (con `language: es`) y las ventanas encendidas (30 días las prenden todas) |
-| Lo que hiciste ayer | **0**: parado con las puertas abiertas · **1-3**: lento · **4-9**: normal · **10+**: rápido, con chispas y líneas de velocidad |
-| Esa misma actividad | Un **semáforo** junto a la vía: rojo (0), ámbar (poca) o verde (normal o mucha) |
-| Tu usuario | El **letrero de la estación** y una **ciudad propia** generada a partir de tu nombre: no hay dos iguales |
-
-Tu racha no se rompe a primera hora: si hoy todavía no hay actividad, cuenta desde ayer.
-
-## Modo calendario
-
-Con `calendar: true` la Action también escribe un calendario de contribuciones junto al tren. Una versión mini de tu tren recorre las semanas en zigzag, come las celdas con contribuciones y crece hasta tener el mismo largo que el tren de la escena. También funciona con trenes propios y de vapor. La franja, las ventanas y la velocidad siguen tu actividad; el texto muestra tus contribuciones y tu racha. También se aplican `language` y `label`. El calendario sigue el tema elegido y deja el tren estacionado si se prefiere reducir el movimiento.
-
-![Calendario de contribuciones con un metro blanco](docs/example-calendar.svg)
-
-```yaml
-      - uses: Cracksmity/git-trains@v1
-        with:
-          calendar: true
-```
-
-Con `theme: both` (el valor por defecto), agrega esto a tu README:
-
-```html
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="dist/train-calendar-dark.svg">
-  <img alt="Mi calendario de contribuciones y mi tren" src="dist/train-calendar-light.svg">
-</picture>
-```
-
-La Action también escribe `train-calendar.svg`. Con un solo tema, escribe únicamente ese archivo de calendario. Mira también el [ejemplo de vapor](docs/example-calendar-steam.svg).
+- **Calendario de contribuciones:** mira un tren en miniatura recorrer tu [cuadrícula de contribuciones](docs/es/usage.md#modo-calendario).
+- **Tarjetas y resumen anual:** muestra [estadísticas, lenguajes y salidas](docs/es/usage.md#tarjetas-de-perfil), o convierte tu año en un [póster de un viaje en tren](docs/es/usage.md#resumen-del-año).
+- **Modelos y escenas:** elige [trenes incluidos](docs/es/reference.md#modelos) y [skylines de ciudades](docs/es/customization.md#skylines-de-ciudades), con decoración estacional y temas claro y oscuro.
+- **Tu propio tren y ciudad:** edita diseños en el [studio](https://cracksmity.github.io/git-trains/studio/), usa JSON personalizado y explora diseños de la comunidad en la [galería](https://cracksmity.github.io/git-trains/gallery/).
 
 ## Uso rápido
 
@@ -70,8 +41,8 @@ jobs:
   train:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: Cracksmity/git-trains@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           language: es # el letrero dice RACHA en vez de STREAK
       - run: |
@@ -92,125 +63,33 @@ Luego agrega esto a tu `README.md` para que siga el tema claro u oscuro de GitHu
 
 Corre el workflow una vez desde la pestaña Actions y el tren aparece. Hay un ejemplo completo, con todas las opciones comentadas, en [examples/workflow.yml](examples/workflow.yml).
 
-## Opciones
+El calendario de la demostración es opcional: agrega `calendar: true` a las opciones `with:` del Action y usa el [ejemplo para insertarlo](docs/es/usage.md#modo-calendario) en tu README.
 
-| Input | Por defecto | Qué hace |
-| --- | --- | --- |
-| `train` | `auto` | `auto` evoluciona con tus vagones; o elige un [modelo](#modelos); o la ruta a [tu propio tren](#haz-tu-propio-tren-con-ia) en JSON |
-| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka` o la ruta a [tu propio skyline](#skylines-de-ciudades) en JSON |
-| `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
-| `calendar` | `false` | `true` tambi?n escribe el calendario de contribuciones animado (ver arriba) |
-| `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto` |
-| `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
-| `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
-| `exclude-languages` | | Lenguajes a dejar fuera, separados por comas, por ejemplo `HTML, Jupyter Notebook` |
-| `scale` | `2` | Tamaño de cada píxel (1 a 6) |
-| `user` | dueño del repo | Usuario a dibujar |
-| `github-token` | `github.token` | Usa un PAT para contar contribuciones privadas |
-| `output-dir` | `dist` | Carpeta de salida |
-| `cards` | `none` | Tarjetas de perfil: `stats`, `languages` o `both` (ver abajo) |
-| `rank` | `letter` | Centro del anillo de la tarjeta de estadísticas: `letter` (S, A+, B...) o `github` (el logo) |
-| `border` | `true` | Borde de las tarjetas |
-| `max-languages` | `6` | Lenguajes en la tarjeta de lenguajes (1 a 10) |
-| `color-background`, `color-title`, `color-icon`, `color-text`, `color-ring` | GitHub oscuro | Colores de las tarjetas, hexadecimal sin `#` |
+## Documentación
 
-Salidas: `files`, `cars`, `streak`, `state`, `model`.
+- [Escenas, calendarios, tarjetas y modo repositorio](docs/es/usage.md)
+- [Todas las opciones y los modelos incluidos](docs/es/reference.md)
+- [Diseños, CLI y comunidad](docs/es/customization.md)
+- [Desarrollo y créditos](docs/es/development.md)
 
-> ¿Vienes de 0.x? Los nombres en español (`tren`, `fondo`, `modo`, `tema`, `idioma`...) y los ids anteriores (`tranvia`, `metro-blanco`, `bala`...) siguen funcionando y dejan un aviso en el log. Los archivos de salida ahora son `train-*.svg` y `card-*.svg`: actualiza las rutas en tu README. Detalles en el [changelog](CHANGELOG.md).
+## Preparar el desarrollo
 
-## Modelos
+Requisito: Node.js 24 o posterior con npm. El Action y el CLI no tienen dependencias de ejecución; lint y tipos usan dependencias de desarrollo fijadas.
 
-| id | Inspirado en | Alimentación |
-| --- | --- | --- |
-| `tram` | TEG-90 de SITEUR, Guadalajara: vino con franjas blancas, dos cuerpos articulados sobre un bogie compartido | Catenaria |
-| `metro-orange` | NC-82 del Metro de la Ciudad de México: frente facetado y rodadura neumática | Barra guía |
-| `metro-gray` | Flota L del Metro de São Paulo (como el L43): acero inoxidable acanalado y máscara negra | Tercer riel |
-| `metro-yellow` | A650 renovado de Los Ángeles: frente amarillo con puerta de emergencia al centro | Tercer riel |
-| `metro-white` | Alstom Metropolis de la Línea 3 de Guadalajara: banda oscura en las ventanas y cara negra | Catenaria |
-| `bullet` | Tren de alta velocidad | Catenaria |
-
-Con `train: auto` el modelo sube conforme ganas vagones: tranvía → metro naranja → metro gris → metro amarillo → metro blanco → tren bala.
-
-Cada tren tiene cabina en ambos extremos (faros blancos adelante, luces rojas atrás). La catenaria solo aparece sobre los trenes con pantógrafo; los demás van por tercer riel.
-
-![Tres vías](docs/example-multi.svg)
-
-## Haz tu propio tren (con IA)
-
-Cualquier tren cabe en un JSON pequeño: colores, franjas, puertas y el frente dibujado fila por fila. No necesitas programar; una IA lo escribe a partir de una foto o una descripción:
-
-1. Pega [docs/ai/train.md](docs/ai/train.md) en el chat de tu IA (Claude, ChatGPT, Gemini...) y, al final, describe tu tren o adjunta una foto. Las instrucciones están en inglés, pero puedes hablarle en español.
-2. Guarda el JSON que te dé en tu repositorio de perfil, por ejemplo como `.github/train.json`.
-3. En el workflow usa `train: .github/train.json`.
-
-```yaml
-      - uses: Cracksmity/git-trains@v1
-        with:
-          train: .github/train.json
-          skyline: new-york
-          language: es
+```sh
+git clone https://github.com/Cracksmity/git-trains.git
+cd git-trains
+npm ci
+npm run preview
 ```
 
-Si algo no cuadra (un color mal escrito, una fila de más), la Action se detiene y lista **todos** los problemas en el log; pégaselos a la IA para que los corrija. En el [playground](https://cracksmity.github.io/git-trains/preview/) (o localmente con `npm run preview`) puedes pegar el JSON y verlo al instante, con los mismos mensajes.
+Abre la URL local que aparece en la terminal para usar el playground. Ejecuta `npm run sample` para generar SVG de muestra y `npm run check` para verificar el proyecto. No hay compilación.
 
-![Metro de Nueva York](docs/example-new-york.svg)
+La arquitectura separa las reglas de actividad, gráficos, trenes y paisajes, acceso a GitHub e interfaces. Consulta [arquitectura](docs/architecture.md), [comandos](scripts/README.md), [contribuciones](CONTRIBUTING.md) e [instrucciones para agentes](AGENTS.md).
 
-Ejemplos en [examples/trains](examples/trains): los R160 del metro de Nueva York, la serie 400 del Metro de Osaka, el tren CAF del Metro de Medellín (salió de una [comparativa de diez corridas de IA](https://cracksmity.github.io/git-trains/benchmarks/medellin/) con las mismas guías y fotos) y una locomotora tanque de vapor. El formato usa las mismas claves que [src/models.js](src/models.js), así que un tren que guste puede entrar al catálogo tal cual. El archivo solo se lee como datos: nada en él se ejecuta, y cada color y medida se revisa antes de dibujar.
+## Índice por temas
 
-**Trenes de vapor.** Con `loco` en vez de `nose`, el tren lleva una locomotora al frente: su propio dibujo de 30 filas, con la chimenea y el domo por encima de los vagones, ruedas motrices unidas por una biela que se mueve y humo que sale más seguido cuanto más rápido va. Los vagones van detrás y el último termina en una cola plana con farol rojo.
-
-![Tren de vapor](docs/example-steam.svg)
-
-## Skylines de ciudades
-
-Detrás del tren hay una ciudad. Por defecto se genera a partir de tu usuario: es solo tuya y es la misma todos los días. Con `skyline: .github/skyline.json` es la ciudad que quieras. Vienen dos incluidas:
-
-| `skyline` | Lo que se ve |
-| --- | --- |
-| `new-york` | One World Trade Center, Empire State, Chrysler, el puente de Brooklyn y la Estatua de la Libertad |
-| `osaka` | La pagoda de Shitennō-ji, la rueda de la fortuna, Tsutenkaku, Abeno Harukas, el Umeda Sky Building, un puente atirantado y el castillo |
-
-Un skyline es una lista de edificios en pixel art, **sin demasiado detalle**: cada uno es un bloque con un remate (escalonado, aguja, antena, cúpula, pirámide) o un dibujo fila por fila para los monumentos con forma propia. No tiene colores propios: usa los del tema, así que cambia solo entre claro y oscuro y de noche se encienden las ventanas. Para hacer el tuyo, pega [docs/ai/skyline.md](docs/ai/skyline.md) en tu IA con la ciudad que quieres o una foto. Ejemplos en [examples/skylines](examples/skylines) (Ciudad de México, Medellín).
-
-![Osaka](docs/example-osaka.svg)
-
-## Tarjetas de perfil
-
-Con `cards: both` la Action también escribe `card-stats.svg` y `card-languages.svg`: una tarjeta de estadísticas (estrellas, commits del último año, PRs, issues y repos en los que contribuiste, con un anillo de rango) y otra con tus lenguajes más usados. Siguen el diseño de las tarjetas de [github-readme-stats](https://github.com/anuraghazra/github-readme-stats), pero **se generan dentro de tu workflow** con el código de este proyecto: sin un servicio externo que se pueda caer y sin actions de terceros. Con `language: es` salen en español.
-
-![Estadísticas](docs/card-stats.svg) ![Lenguajes](docs/card-languages.svg)
-
-Si la consulta de estadísticas falla (por ejemplo, por un límite de la API), la Action deja un `::warning::` y sigue: el tren se genera igual. El rango es una aproximación (una mezcla ponderada de commits, PRs, issues, reseñas, estrellas y seguidores).
-
-## Cómo funciona
-
-- Sin dependencias ni paso de build: JavaScript que corre directo en el runner (Node 24).
-- Cada tren se dibuja **en código sobre una rejilla común** (coches de 64 px con 2 o 3 puertas por lado, bogies con dos ruedas de disco de 7 px, bastidor y cajas de grasa, pintados con la paleta de cada modelo), no a partir de imágenes. Las capas (caja, puertas, ruedas, letrero, chispas, humo) se animan por separado.
-- El resultado es un SVG de ~40 KB (~75 KB en modo `multi`) con CSS: el tren avanza **de 1 px en 1 px** (`steps()`), las marcas de las ruedas alternan entre dos fotogramas, las nubes se desplazan y las estrellas titilan en el tema oscuro. Respeta `prefers-reduced-motion`.
-- El letrero LED usa su propia fuente de 3×5 píxeles; el tren no usa texto SVG, así que no depende de fuentes.
-- Si la API de GitHub falla un momento, se reintenta con espera creciente (los 502 son comunes en consultas GraphQL pesadas).
-
-## Hecho con un director de IAs
-
-Este proyecto lo construye una IA que dirige a otras. [tools/conductor](tools/conductor) le pasa cada tarea a Codex o a Antigravity (Gemini) según su tipo, la corre en un worktree de git aislado, revisa el resultado con filtros (tests, el validador, enlaces, traducción), le devuelve los fallos y sube a un modelo más fuerte cuando uno sigue fallando. El reparto sale de la [comparativa de Medellín](https://cracksmity.github.io/git-trains/benchmarks/medellin/), donde diez corridas de IA diseñaron el mismo tren y skyline.
-
-## Desarrollo
-
-```bash
-npm run preview    # playground en http://localhost:4173 (controles en vivo)
-npm run sample     # escribe SVG con datos de muestra en ./sample
-npm test           # tests
-npm run docs       # regenera los SVG de docs/
-node scripts/sheet.js sheet.png 5 3 0                                # hoja PNG ampliada de todos los modelos
-node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json   # ...o de un tren en JSON
-```
-
-Lee [CONTRIBUTING.md](CONTRIBUTING.md) para agregar un modelo, un skyline o lo que sea.
-
-## Créditos
-
-La idea de convertir la actividad en una imagen viva viene de [git-koi](https://github.com/yalongwastaken/git-koi). Los trenes toman de las fotos de los reales solo el color y la forma; no se reproducen logotipos ni rótulos.
-
-## Licencia
-
-[MIT](LICENSE).
+- **Actividad y resultados:** <a id="qué-significa-cada-parte"></a>[Qué significa cada parte](docs/es/usage.md#qué-significa-cada-parte) · <a id="vagones-desbloqueables"></a>[Vagones desbloqueables](docs/es/usage.md#vagones-desbloqueables) · <a id="modo-calendario"></a>[Modo calendario](docs/es/usage.md#modo-calendario) · <a id="resumen-del-año"></a>[Resumen del año](docs/es/usage.md#resumen-del-año) · <a id="estaciones-y-fiestas"></a>[Estaciones y fiestas](docs/es/usage.md#estaciones-y-fiestas) · <a id="tarjetas-de-perfil"></a>[Tarjetas de perfil](docs/es/usage.md#tarjetas-de-perfil) · <a id="panel-de-salidas"></a>[Panel de salidas](docs/es/usage.md#panel-de-salidas) · <a id="en-el-readme-de-un-repositorio"></a>[En el README de un repositorio](docs/es/usage.md#en-el-readme-de-un-repositorio).
+- **Configuración:** <a id="opciones"></a>[Opciones](docs/es/reference.md#opciones) · <a id="modelos"></a>[Modelos](docs/es/reference.md#modelos).
+- **Diseños personalizados:** <a id="haz-tu-propio-tren-a-mano-o-con-ia"></a>[Haz tu propio tren (a mano o con IA)](docs/es/customization.md#haz-tu-propio-tren-a-mano-o-con-ia) · <a id="skylines-de-ciudades"></a>[Skylines de ciudades](docs/es/customization.md#skylines-de-ciudades) · <a id="el-campo-de-una-región"></a>[El campo de una región](docs/es/customization.md#el-campo-de-una-región) · <a id="diseña-desde-la-terminal"></a>[Diseña desde la terminal](docs/es/customization.md#diseña-desde-la-terminal) · <a id="comparte-tu-ciudad"></a>[Comparte tu ciudad](docs/es/customization.md#comparte-tu-ciudad).
+- **Sobre el proyecto:** <a id="cómo-funciona"></a>[Cómo funciona](docs/es/usage.md#cómo-funciona) · <a id="hecho-con-un-director-de-ias"></a>[Hecho con un director de IAs](docs/es/development.md#hecho-con-un-director-de-ias) · <a id="desarrollo"></a>[Desarrollo](docs/es/development.md#desarrollo) · <a id="créditos"></a>[Créditos](docs/es/development.md#créditos) · <a id="licencia"></a>[Licencia](docs/es/development.md#licencia).

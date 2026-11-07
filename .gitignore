@@ -5,3 +5,21 @@ muestra/
 .claude/
 reference/
 .conductor/
+output/
+dist/
+out/
+coverage/
+*.log
+.eslintcache
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx

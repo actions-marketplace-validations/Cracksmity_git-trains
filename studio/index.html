@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>git-trains · studio</title>
+<link rel="icon" href="../docs/favicon.svg" type="image/svg+xml">
+<meta name="description" content="Design your own pixel-art train or city skyline for git-trains: every field as a form, the nose drawn pixel by pixel, a live preview, and a link to share it.">
+<meta property="og:title" content="git-trains · studio">
+<meta property="og:description" content="Design your own pixel-art train or city skyline for your GitHub profile, and share it with a link.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/studio/style.css">
+</head>
+<body>
+<main>
+  <div class="stripe" aria-hidden="true"></div>
+  <nav class="eyebrow"><a href="../">git-trains</a> · <a href="../preview/">playground</a> · <a href="../benchmarks/medellin/">benchmark</a></nav>
+  <h1>git-trains · studio</h1>
+  <p class="sub">Design your own train or city by hand, pixel by pixel, with the same checks as the Action. Save the JSON in your profile repository, or share it with a link.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-train" aria-selected="true" aria-controls="panel-train">Train</button>
+    <button role="tab" id="tab-skyline" aria-selected="false" aria-controls="panel-skyline">Skyline</button>
+  </div>
+  <div id="share-error" class="status bad" hidden></div>
+  <section id="panel-train" role="tabpanel" aria-labelledby="tab-train"></section>
+  <section id="panel-skyline" role="tabpanel" aria-labelledby="tab-skyline" hidden>
+    <p class="placeholder">Loading the skyline editor…</p>
+  </section>
+</main>
+
+<script type="module" src="../assets/studio/app.js"></script>
+</body>
+</html>

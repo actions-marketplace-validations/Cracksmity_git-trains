@@ -3,74 +3,186 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>git-trains</title>
-<meta name="description" content="A GitHub Action that draws a pixel-art train from your public GitHub activity.">
+<title>git-trains: your GitHub activity as a pixel-art train</title>
+<link rel="icon" href="docs/favicon.svg" type="image/svg+xml">
+<meta name="description" content="A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity. A GitHub Action, no external service.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="git-trains">
+<meta property="og:url" content="https://cracksmity.github.io/git-trains/">
+<meta property="og:title" content="git-trains: your GitHub activity as a pixel-art train">
+<meta property="og:description" content="A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity. A GitHub Action, no external service.">
+<meta property="og:image" content="https://cracksmity.github.io/git-trains/docs/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A pixel-art bullet train crossing a city at night under the title git-trains">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@600&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
-<style>
-/* Home of the GitHub Pages site: the train on top and two destinations. */
-:root {
-  --bg: #f2f4f1; --surface: #ffffff; --ink: #18201b; --muted: #59645d; --line: #d6ddd7;
-  --green: #1b8638; --yellow: #c98f00;
-  --display: "Pixelify Sans", "Courier New", monospace;
-  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #101412; --surface: #182019; --ink: #e6ece7; --muted: #98a49c; --line: #2a342d; --green: #47c06a; --yellow: #f0c23a; color-scheme: dark; }
-}
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
-img { max-width: 100%; display: block; }
-.wrap { max-width: 960px; margin: 0 auto; padding: 48px max(16px, env(safe-area-inset-right, 0px)) 64px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 32px; }
-.stripe { height: 6px; width: 120px; background: linear-gradient(to bottom, var(--yellow) 0 50%, var(--green) 50% 100%); }
-header { display: grid; gap: 14px; }
-h1, h2 { font-family: var(--display); font-weight: 600; margin: 0; line-height: 1.15; }
-h1 { font-size: clamp(34px, 6vw, 52px); }
-h2 { font-size: 21px; }
-p { margin: 0; max-width: 64ch; }
-.scene img { width: 100%; image-rendering: pixelated; border-radius: 6px; }
-.places { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.place { display: grid; gap: 8px; align-content: start; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
-.place:hover { border-color: var(--green); }
-.place:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-.place .go { font: 500 13px var(--mono); color: var(--green); }
-footer { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
-footer a { color: var(--green); }
-@media (max-width: 640px) { .places { grid-template-columns: minmax(0, 1fr); } }
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/home/style.css">
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <header class="hero">
     <div class="stripe" aria-hidden="true"></div>
-    <h1>git-trains</h1>
-    <p>A GitHub Action that draws a pixel-art train from your public GitHub activity: the cars grow with your contributions, the stripe takes the color of your top language and the speed depends on what you did yesterday.</p>
+    <div class="hero-top">
+      <div class="hero-text">
+        <h1>git-trains</h1>
+        <p class="pitch">A pixel-art train for your GitHub profile that grows, changes color and speeds up with your activity.</p>
+      </div>
+      <div class="cta">
+        <a class="btn main" href="#setup">Get it in 60 seconds</a>
+        <a class="btn" href="https://github.com/Cracksmity/git-trains">Star it on GitHub</a>
+      </div>
+    </div>
+    <figure>
+      <img class="scene" id="hero" width="896" height="408" src="docs/example-multi.svg" alt="Three pixel-art trains, one per language, running on three tracks in front of a city">
+      <figcaption>
+        <span class="label" id="yesterday-label">Contributions yesterday</span>
+        <div class="seg" id="yesterday" role="group" aria-labelledby="yesterday-label">
+          <button data-v="0" aria-pressed="false">0</button>
+          <button data-v="2" aria-pressed="false">1–3</button>
+          <button data-v="6" aria-pressed="true">4–9</button>
+          <button data-v="14" aria-pressed="false">10+</button>
+        </div>
+        <span id="yesterday-says" aria-live="polite">Normal speed, green signal.</span>
+      </figcaption>
+    </figure>
   </header>
-  <div class="scene">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/example-dark.svg">
-      <img alt="An example git-trains train passing in front of a city" src="docs/example-light.svg">
-    </picture>
-  </div>
-  <div class="places">
+
+  <section id="read" aria-labelledby="read-h">
+    <header>
+      <h2 id="read-h">How to read a train</h2>
+      <p>Every part of the drawing stands for something you did on GitHub. A workflow redraws it every morning, so it changes with you.</p>
+    </header>
+    <div class="closeup" id="closeup" hidden></div>
+    <p class="hint" id="hint" hidden>Hover or tap a part of the train, or an item below, to match them up.</p>
+    <ul class="parts" id="parts">
+      <li><button data-part="cars" aria-pressed="false"><b>Cars</b><span>Contributions in the last year. One car to start, then one more at 50, 200, 500, 1,000 and 2,000.</span></button></li>
+      <li><button data-part="stripe" aria-pressed="false"><b><i class="swatch" id="stripe-swatch" style="background:#3178c6"></i>Stripe</b><span>Your top language, in its GitHub color. Leave languages out with <code>exclude-languages</code>.</span></button></li>
+      <li><button data-part="led" aria-pressed="false"><b>LED sign</b><span>Your streak in days. With nothing yet today, it still counts from yesterday.</span></button></li>
+      <li><button data-part="lit" aria-pressed="false"><b>Lit windows</b><span>The streak again: more windows light up each day, front to back, and all of them at 30.</span></button></li>
+      <li><button data-part="wheels" aria-pressed="false"><b>Speed</b><span>Yesterday's contributions. None stops the train with its doors open; 10 or more brings sparks and speed lines.</span></button></li>
+      <li><button data-part="signal" aria-pressed="false"><b>Signal</b><span>Yesterday too: red for nothing, amber for a little, green for a normal or busy day.</span></button></li>
+    </ul>
+  </section>
+
+  <section id="models" aria-labelledby="models-h">
+    <header>
+      <h2 id="models-h">Six trains, one for each stage</h2>
+      <p>With <code>train: auto</code> your train moves up a model with every car it gains. You can also pick one, <a href="studio/">draw your own in the studio</a>, or <a href="preview/#yours">design it with AI</a>.</p>
+    </header>
+    <div class="models">
+      <article class="model"><canvas data-model="tram" data-lang="TypeScript" width="1" height="1"></canvas><h3>Tram</h3><p>Guadalajara's SITEUR TEG-90: wine red, two bodies on a shared bogie.</p><p><code>tram</code> <span class="when">1 car, from day one</span></p></article>
+      <article class="model"><canvas data-model="metro-orange" data-lang="Python" width="1" height="1"></canvas><h3>Orange metro</h3><p>Mexico City's NC-82: a faceted front and rubber tires.</p><p><code>metro-orange</code> <span class="when">2 cars, 50 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-gray" data-lang="Rust" width="1" height="1"></canvas><h3>Gray metro</h3><p>São Paulo's L fleet: fluted stainless steel and a black mask.</p><p><code>metro-gray</code> <span class="when">3 cars, 200 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-yellow" data-lang="Go" width="1" height="1"></canvas><h3>Yellow metro</h3><p>The L.A. Metro's refurbished A650: a yellow front with an emergency door in the middle.</p><p><code>metro-yellow</code> <span class="when">4 cars, 500 contributions</span></p></article>
+      <article class="model"><canvas data-model="metro-white" data-lang="Ruby" width="1" height="1"></canvas><h3>White metro</h3><p>The Alstom Metropolis of Guadalajara's Line 3: a dark window band and a black face.</p><p><code>metro-white</code> <span class="when">5 cars, 1,000 contributions</span></p></article>
+      <article class="model"><canvas data-model="bullet" data-lang="JavaScript" width="1" height="1"></canvas><h3>Bullet train</h3><p>The high-speed train at the top of the line, under overhead wires.</p><p><code>bullet</code> <span class="when">6 cars, 2,000 contributions</span></p></article>
+    </div>
+  </section>
+
+  <section id="cities" aria-labelledby="cities-h">
+    <header>
+      <h2 id="cities-h">A city behind every train</h2>
+      <p>The default city is built from your username, so nobody else gets your skyline. New York and Osaka come built in, and an AI can draw any other one for you.</p>
+    </header>
+    <div class="city-bar">
+      <div class="seg" id="skyline" role="group" aria-label="Skyline">
+        <button data-v="city" aria-pressed="true">Your city</button>
+        <button data-v="new-york" aria-pressed="false">New York</button>
+        <button data-v="osaka" aria-pressed="false">Osaka</button>
+      </div>
+      <label class="field">GitHub username
+        <input id="user" type="text" value="octocat" maxlength="39" spellcheck="false" autocomplete="off" autocapitalize="off">
+      </label>
+    </div>
+    <img class="scene" id="city" width="896" height="200" src="docs/example-new-york.svg" alt="A train in front of a city">
+    <p class="muted">For another city, copy the AI instructions in the <a href="preview/#yours">playground</a>: <a href="examples/skylines/medellin.json">Medellín</a> and <a href="examples/skylines/mexico-city.json">Mexico City</a> were made that way.</p>
+  </section>
+
+  <section id="setup" aria-labelledby="setup-h">
+    <header>
+      <h2 id="setup-h">Get it in 60 seconds</h2>
+      <p>No token to create and no service to sign up for: a workflow in your profile repository draws the train every morning and commits the SVG.</p>
+    </header>
+    <ol class="steps">
+      <li>
+        <p>In your profile repository (the one named after your username), create this workflow:</p>
+        <div class="code">
+          <div class="code-head"><span>.github/workflows/train.yml</span><button data-copy="yaml">Copy</button></div>
+<pre><code id="yaml">name: GitHub train
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist
+          git diff --cached --quiet || (git commit -m "chore: update train" &amp;&amp; git push)</code></pre>
+        </div>
+      </li>
+      <li>
+        <p>Add the train to your profile <code>README.md</code>. It follows GitHub's light or dark theme:</p>
+        <div class="code">
+          <div class="code-head"><span>README.md</span><button data-copy="readme">Copy</button></div>
+<pre><code id="readme">&lt;picture&gt;
+  &lt;source media=&quot;(prefers-color-scheme: dark)&quot; srcset=&quot;dist/train-dark.svg&quot;&gt;
+  &lt;img alt=&quot;My GitHub train&quot; src=&quot;dist/train-light.svg&quot;&gt;
+&lt;/picture&gt;</code></pre>
+        </div>
+      </li>
+      <li>
+        <p>Run the workflow once from the Actions tab, and your train pulls in. Every option, from the model to profile cards, is in the <a href="https://github.com/Cracksmity/git-trains#options">README</a>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <nav class="places" aria-label="More">
     <a class="place" href="preview/">
-      <h2>Playground</h2>
-      <p>Try the trains and skylines with live controls, and paste the JSON of your own train or city to see it right away, with the same error messages the Action gives.</p>
+      <h3>Playground</h3>
+      <p>Every model, skyline and speed with live controls. Paste the JSON of your own train or city and see it right away.</p>
       <span class="go">Open the playground</span>
     </a>
+    <a class="place" href="studio/">
+      <h3>Studio</h3>
+      <p>Design your train or city by hand: every color and stripe as a form, the nose drawn pixel by pixel over a photo, and a link to share it.</p>
+      <span class="go">Open the studio</span>
+    </a>
     <a class="place" href="benchmarks/medellin/">
-      <h2>Medellín Metro in ten runs</h2>
-      <p>Ten models in Claude Code, Codex and Antigravity design the same CAF train and the same skyline, with their tokens, times and results side by side.</p>
+      <h3>Medellín Metro in ten runs</h3>
+      <p>Ten AI runs in Claude Code, Codex and Antigravity design the same train and skyline from one brief, with their tokens, times and results side by side.</p>
       <span class="go">See the benchmark</span>
     </a>
-  </div>
+    <a class="place" href="leaderboard/">
+      <h3>AI leaderboard</h3>
+      <p>Which AI built git-trains: every task the conductor gave to Codex or Antigravity, with each model's first-try passes, time and tokens.</p>
+      <span class="go">See the leaderboard</span>
+    </a>
+    <a class="place" href="https://github.com/Cracksmity/git-trains">
+      <h3>Source on GitHub</h3>
+      <p>MIT licensed, no dependencies. Issues, ideas and new trains are welcome, and a star helps more people find it.</p>
+      <span class="go">Cracksmity/git-trains</span>
+    </a>
+  </nav>
+
   <footer>
-    <a href="https://github.com/Cracksmity/git-trains">Code and how to use it</a>
     <a href="https://github.com/Cracksmity/git-trains/blob/main/README.md">README</a>
     <a href="https://github.com/Cracksmity/git-trains/blob/main/README.es.md">README en español</a>
+    <a href="https://github.com/Cracksmity/git-trains/blob/main/CHANGELOG.md">Changelog</a>
+    <span>MIT license</span>
   </footer>
 </div>
+
+<script type="module" src="assets/home/app.js"></script>
 </body>
 </html>

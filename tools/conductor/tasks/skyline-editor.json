@@ -1,0 +1,16 @@
+{
+  "name": "skyline-editor",
+  "route": "design",
+  "promptFile": "skyline-editor.md",
+  "allow": [
+    "src/studio/skyline/**",
+    "tests/studio/skyline-editor.test.js"
+  ],
+  "gates": [
+    "node --check src/studio/skyline/controller.js",
+    "node -e \"Promise.all([import('./src/studio/skyline/controller.js'),import('./src/studio/skyline/format.js')]).then(([controller,format])=>{if(typeof controller.mountSkylineEditor!=='function'||typeof format.formatSkyline!=='function')process.exit(1)})\"",
+    "npm test"
+  ],
+  "attempts": 2,
+  "timeoutMin": 35
+}

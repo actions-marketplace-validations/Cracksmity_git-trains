@@ -2,14 +2,17 @@
 // node scripts/sheet.js out.png [scale] [cars] [open] [model,model...]
 // Each model can be a catalog id or the path to a custom train (.json):
 // node scripts/sheet.js mine.png 5 2 0 examples/trains/new-york.json
+// A special car (dining, observation or mail) joins every train with a 7th argument:
+// node scripts/sheet.js cars.png 4 3 0 metro-orange,bullet a dining
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { deflateSync } from 'node:zlib';
-import { buildTrain, TRAIN_H } from '../src/train.js';
-import { MODEL_ORDER, getModel } from '../src/models.js';
-import { parseCustomModel } from '../src/custom.js';
+import { buildTrain } from '../src/trains/render.js';
+import { TRAIN_H } from '../src/trains/geometry.js';
+import { MODEL_ORDER, getModel } from '../src/trains/models.js';
+import { parseCustomModel } from '../src/trains/parse.js';
+import { png } from '../tools/export/png.js';
 
-const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a'] = process.argv.slice(2);
+const [out = 'sheet.png', scaleArg = '4', carsArg = '3', openArg = '0', modelsArg, frameArg = 'a', extraArg = ''] = process.argv.slice(2);
 const scale = Number(scaleArg);
 const cars = Number(carsArg);
 const open = openArg === '1';
@@ -27,7 +30,7 @@ function hex(c) {
 
 const load = (id) => (id.endsWith('.json') ? parseCustomModel(JSON.parse(readFileSync(id, 'utf8'))) : getModel(id));
 const trains = ids.map((id, i) =>
-  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: 12, label: 'STREAK' }),
+  buildTrain(load(id), { cars, stripe: stripeColors[i % stripeColors.length], streak: extraArg ? 120 : 12, label: 'STREAK', extra: extraArg || null }),
 );
 const gap = 6;
 const W = Math.max(...trains.map((t) => t.width)) * scale + 16;
@@ -63,41 +66,3 @@ trains.forEach((t, k) => {
 
 writeFileSync(out, png(W, H, px));
 console.log(`${out} ${W}x${H}`);
-
-function png(w, h, rgba) {
-  const raw = Buffer.alloc((w * 4 + 1) * h);
-  for (let y = 0; y < h; y++) {
-    raw[y * (w * 4 + 1)] = 0;
-    Buffer.from(rgba.buffer, y * w * 4, w * 4).copy(raw, y * (w * 4 + 1) + 1);
-  }
-  const chunk = (type, data) => {
-    const len = Buffer.alloc(4);
-    len.writeUInt32BE(data.length);
-    const body = Buffer.concat([Buffer.from(type), data]);
-    const crc = Buffer.alloc(4);
-    crc.writeUInt32BE(crc32(body) >>> 0);
-    return Buffer.concat([len, body, crc]);
-  };
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(w, 0);
-  ihdr.writeUInt32BE(h, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
-  return Buffer.concat([
-    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', deflateSync(raw)),
-    chunk('IEND', Buffer.alloc(0)),
-  ]);
-}
-
-function crc32(buf) {
-  let c;
-  let crc = 0xffffffff;
-  for (let n = 0; n < buf.length; n++) {
-    c = (crc ^ buf[n]) & 0xff;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    crc = (crc >>> 8) ^ c;
-  }
-  return crc ^ 0xffffffff;
-}

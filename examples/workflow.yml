@@ -13,10 +13,11 @@ permissions:
 jobs:
   train:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - uses: Cracksmity/git-trains@v1
+      - uses: Cracksmity/git-trains@3b431f93872507bc915be9f20e8b84ed104fdbe8 # v1.1.2
         with:
           train: auto # or: tram, metro-orange, metro-gray, metro-yellow, metro-white, bullet, or your JSON: .github/train.json
           # skyline: new-york # or osaka, or your skyline in JSON: .github/skyline.json (see docs/ai/skyline.md)
@@ -24,6 +25,8 @@ jobs:
           # language: es # the LED sign reads RACHA instead of STREAK
           # exclude-languages: HTML, Jupyter Notebook
           # cards: both # adds card-stats.svg and card-languages.svg (see the README)
+          # year-in-review: true # adds year-in-review.svg: a poster of one year as a train journey
+          # review-year: 2025 # which year; empty = this year so far (last year in January)
 
       - name: Save the SVGs
         run: |
