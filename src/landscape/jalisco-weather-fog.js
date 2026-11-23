@@ -10,7 +10,7 @@ const isForeground = (ink) => ink === '@mast' || ink === '@wire' || (typeof ink 
  * @param {number} x column
  * @param {number} dist rows outside the solid edge: 1 = 75%, 2 = 50%, 3 = 25%
  */
-function dither(x, dist) {
+export function dither(x, dist) {
   const m = ((x % 4) + 4) % 4;
   if (dist <= 0) return true;
   if (dist === 1) return m !== 3;
@@ -31,7 +31,7 @@ function cloudyCitySkyAt(x, y, base) {
 }
 
 // Choose @wFogLight or @wFog inside a two-tone bank, with a 25/50/75% dither across `mid`.
-function fogTone(x, y, mid) {
+export function fogTone(x, y, mid) {
   if (y >= mid) return '@wFog';
   const dist = mid - y;
   return dist <= 3 && dither(x, dist) ? '@wFog' : '@wFogLight';
@@ -44,8 +44,9 @@ function fogTone(x, y, mid) {
  * @param {import('../graphics/pixel.js').Grid} g
  * @param {{ top: number, base: number, bottom: number }} band
  * @param {import('../graphics/pixel.js').Grid} backdrop
+ * @param {boolean} [haze] keep the dust-tinted ridge visible above the fog bank
  */
-export function paintGuadalajaraFog(g, band, backdrop) {
+export function paintGuadalajaraFog(g, band, backdrop, haze = false) {
   for (let x = 0; x < g.w; x++) {
     // Dip slightly at Estadio Jalisco (x ~ 54) so its white roof ring anchors the trusses.
     const estadioDip = 1.4 * Math.exp(-(((x - 54) / 34) ** 2));
@@ -58,7 +59,7 @@ export function paintGuadalajaraFog(g, band, backdrop) {
         g.set(x, y, fogTone(x, y, mid));
       } else if (y >= top - 3 && dither(x, top - y)) {
         g.set(x, y, '@wFogLight');
-      } else if (under === '@ridge') {
+      } else if (under === '@ridge' && !haze) {
         g.set(x, y, cloudyCitySkyAt(x, y, band.base));
       }
     }

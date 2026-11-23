@@ -7,14 +7,15 @@
 | Input | Por defecto | Qué hace |
 | --- | --- | --- |
 | `train` | `auto` | `auto` evoluciona con tus vagones. Puedes elegir un [modelo](#modelos), los trenes de `jalisco` o la ruta al JSON de [tu propio tren](customization.md#haz-tu-propio-tren-a-mano-o-con-ia). |
-| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka`, `jalisco` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
+| `skyline` | `city` | `city` (generada y única para ti), `new-york`, `osaka`, `jalisco`, `jalisco-sayula` o la ruta a [tu propio skyline](customization.md#skylines-de-ciudades) en JSON |
 | `mode` | `single` | `single`: un tren con tu lenguaje principal · `multi`: 3 vías, un tren por lenguaje, en sentidos opuestos |
 | `calendar` | `false` | `true` también escribe el calendario de contribuciones animado (ver arriba) |
 | `year-in-review` | `false` | `true` también escribe `year-in-review.svg`: un póster de un año natural, dibujado como un viaje en tren (ver [Resumen del año](usage.md#resumen-del-año)) |
 | `review-year` | año en curso | El año que muestra el póster (de 2008 al actual). Vacío: el año en curso hasta hoy, o el año que acaba de terminar en enero |
 | `seasons` | `true` | `true` viste la escena con la estación o la fiesta del día en que corre; `false` la deja sin adornos (ver [Estaciones y fiestas](usage.md#estaciones-y-fiestas)) |
 | `hemisphere` | `north` | `north` o `south`: qué hemisferio siguen las estaciones. Las fiestas conservan sus fechas |
-| `weather` | `off` | Para el skyline `jalisco`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
+| `weather` | `off` | Para `jalisco` y `jalisco-sayula`: `live` (el clima actual según Open-Meteo), `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm`, `hail`, o un estado por lugar separado por comas (ver [Clima](#clima)) |
+| `weather-cache` | | Con `weather: live`: la ruta de un archivo `.json` en el repositorio que guarda la última lectura buena entre corridas, para cuando Open-Meteo no responde (ver [Conservar la última lectura](#conservar-la-última-lectura)) |
 | `theme` | `both` | `both` escribe `train-light.svg`, `train-dark.svg` y `train.svg` (automático); o `light`, `dark`, `auto`, o `local`: día o noche donde está la escena (ver [Clima](#clima)) |
 | `language` | `en` | `en` o `es`: la palabra del letrero (`STREAK` / `RACHA`), el título de la imagen y los textos de las tarjetas |
 | `label` | según `language` | Palabra del letrero LED (tiene prioridad sobre `language`) |
@@ -57,6 +58,8 @@ Los seis modelos que evolucionan con tu actividad tienen cabinas en ambos extrem
 
 Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres primeros lenguajes corresponden al TEG-90 articulado de Guadalajara, al carguero de Los Altos y al José Cuervo Express entre los agaves. La racha cuelga en una placa bajo el letrero con tu nombre. Si hay menos lenguajes, se dibuja el número de vías correspondiente.
 
+Con `skyline: jalisco-sayula`, el carguero pasa junto a la Laguna de Sayula entre Guadalajara y Tequila. Con `weather: live`, la leyenda de la segunda vía muestra la temperatura de Sayula.
+
 ![Los tres trenes cruzando Jalisco](../../examples/jalisco/jalisco-sobre-rieles.svg)
 
 [Lecciones de diseño y publicación de la escena de Jalisco](jalisco-lecciones.md)
@@ -65,9 +68,37 @@ Usa `jalisco` tanto en `train` como en `skyline`. En `mode: multi`, los tres pri
 
 La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather` al bloque `with`:
 
-- `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action. No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
-- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `storm` o `hail` fija el mismo estado en todos los lugares. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- `live` consulta el clima actual de Guadalajara, Los Altos (en Arandas) y Tequila en [Open-Meteo](https://open-meteo.com/) cuando corre la Action y muestra la temperatura de cada lugar en su leyenda (por ejemplo `Tequila 20° / Rust 15%`). No necesita clave. Si la consulta falla, la escena se dibuja sin clima y el log explica por qué.
+- `clear`, `frost`, `heat`, `partly`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `storm` o `hail` fija el mismo estado en todos los lugares, sin temperatura en las leyendas. `storm, rain, cloudy` da un estado por lugar, en el orden de las vías.
+- Agrega `+wind` a cualquier estado. Con `rain+wind` sopla el viento en los tres lugares. Con `storm+wind, clear, hail+wind`, Los Altos queda en calma. El clima en vivo agrega viento donde la velocidad alcanza los 40 km/h. Los árboles se mecen, el viento levanta polvo rojo de las parcelas aradas de Los Altos y la lluvia y el granizo caen en diagonal.
+- Agrega `+haze` para dibujar una capa café sobre la loma del fondo y las torres del poniente de Guadalajara. Aparece con `clear`, `partly`, `cloudy`, `heat` y `fog`. Puedes combinarla con viento en cualquier orden, por ejemplo `cloudy+wind+haze`. La Catedral y los monumentos del primer plano se mantienen nítidos.
+- En modo `live`, una segunda consulta opcional lee la concentración de PM2.5 en la API de calidad del aire de Open-Meteo solo para Guadalajara. La calima aparece en esos estados cuando la concentración supera los 55 µg/m³. Si falla esta lectura, la Action registra un aviso y dibuja el clima que recibió.
 - `off`, el valor por defecto, deja la escena como está.
+
+##### Conservar la última lectura
+
+Los runners de GitHub comparten direcciones IP, y Open-Meteo cuenta su cuota gratuita diaria por dirección. Por eso una lectura en vivo puede fallar sin que sea tu culpa: por un timeout, o por un `429` cuando la dirección compartida ya gastó su cuota. Pon en `weather-cache` la ruta de un `.json` y conserva ese archivo entre corridas con `actions/cache`:
+- Después de cada lectura buena, la Action la guarda ahí.
+- Cuando Open-Meteo no responde, la escena usa la lectura guardada si tiene a lo más 6 horas, y el log dice qué tan vieja es.
+- Una lectura guardada para otros lugares no se usa; por ejemplo, la de Los Altos después de cambiar a `jalisco-sayula`.
+
+```yaml
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+          restore-keys: weather-
+      # Tu paso de git-trains, con estas dos entradas en su bloque `with`:
+      #   weather: live
+      #   weather-cache: .weather/last.json
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: always()
+        with:
+          path: .weather/last.json
+          key: weather-${{ github.run_id }}
+```
+
+Cada corrida guarda con una clave propia, y `restore-keys` recupera la más reciente. El archivo solo contiene el clima de los lugares públicos de la escena. Déjalo fuera de `output-dir` para que no se publique con las imágenes.
 
 | Estado | Guadalajara | Los Altos | Tequila |
 | --- | --- | --- | --- |
@@ -79,6 +110,7 @@ La escena de Jalisco puede mostrar el clima de sus tres lugares. Agrega `weather
 | `fog` (neblina) | El cielo nublado con una franja pálida de neblina tramada sobre la parte baja de la ciudad; las puntas de la Catedral, las torres del poniente y La Minerva sobresalen y la loma del fondo desaparece | Neblina en lo bajo entre las lomas; la torre de la parroquia y las copas de los mezquites sobresalen, y los techos de los ranchos quedan medio visibles | Un banco de neblina sobre las hileras lejanas de agave y las laderas bajas del volcán, con solo la cumbre asomando y las hileras cercanas despejadas |
 | `drizzle` (llovizna) | El cielo nublado con gotas finas y escasas, una plaza mojada que refleja los faroles y algunos charcos en el balasto | Gotas finas, tejas que brillan y algunos charcos en el balasto | Gotas finas, la bufanda nublada alrededor del volcán y algunos charcos en el balasto |
 | `rain` (lluvia) | Nubes más bajas y oscuras, lluvia, una nube que cruza la torre más alta y una plaza mojada que refleja los faroles | Lluvia, tejas que brillan y agua en los surcos | Lluvia, una bufanda más gruesa y agua en los surcos cercanos |
+| `snow` (nieve) | El cielo nublado con copos lentos que se mecen; la nieve se posa en las torres y techos de la Catedral, el techo del estadio, las cúpulas históricas, los árboles y la fila de la plaza | Copos que se mecen, blanco en los techos de los ranchos y la parroquia y a lo largo de la cerca de piedra, con manchas de nieve en las lomas que dejan asomar las parcelas rojas | Copos que se mecen, las laderas altas del Volcán de Tequila cubiertas de blanco y un toque de nieve en las puntas del agave |
 | `storm` (tormenta) | El cielo más oscuro, lluvia fuerte y relámpagos detrás de las torres de la Catedral | Relámpagos sobre las lomas lejanas | Relámpagos junto al volcán |
 | `hail` (granizo) | Bajo los relámpagos, el granizo cae rápido y rebota al tocar el suelo. Se acumula en la plaza, en los techos de la Catedral, del Sagrario y del estadio, y al pie de La Minerva | El granizo se junta en los surcos de tierra roja y en el balasto | Granos blancos entre las hileras de agave y en el balasto |
 
@@ -92,6 +124,8 @@ Con `theme: local`, la escena también sigue el día y la noche de Guadalajara:
 - Para que cambie cerca del amanecer y el atardecer, programa el workflow cada hora (`cron: "0 * * * *"`).
 - Los skylines sin lugares reales usan `auto`, que sigue el modo claro u oscuro de quien ve el README.
 
-Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. La nieve cuenta como `rain`. El arte de esos y otros climas está en la [lista de climas pendientes](clima-pendiente.md), con prompts listos para usar. El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
+Open-Meteo reporta códigos de clima WMO. El código 0 corresponde a `clear` y los códigos 1 y 2 a `partly`. Con cualquiera de los tres, una temperatura de 2 °C o menos da `frost` y una de 32 °C o más da `heat`. El código 3 corresponde a `cloudy`, y el 45 y el 48 a `fog`. Los códigos 51 a 57 corresponden a `drizzle`, del 61 al 67 y del 80 al 82 a `rain`, y el 71, 73, 75, 77, 85 y 86 a `snow`. El código 95 corresponde a `storm`, y el 96 y el 99 a `hail`. Las reglas para un diseño nuevo del clima están en la [lista de climas pendientes](clima-pendiente.md). El título de la imagen nombra el clima de cada lugar para los lectores de pantalla. Datos del clima y de la calidad del aire de [Open-Meteo](https://open-meteo.com/), con licencia CC BY 4.0.
+
+Idea de Estrellita ✨: mostrar en la escena el clima real de Guadalajara, Los Altos y Tequila.
 
 En Jalisco el clima reemplaza la nieve, los pétalos y las hojas de cada estación; las fiestas se quedan. Los demás skylines conservan sus estaciones. Para cambiar esa regla, edita la lista `WEATHER_OVER_SEASONS` en [src/scene/weather.js](../../src/scene/weather.js).

@@ -14,9 +14,9 @@ import { buildReview } from '../../src/review/data.js';
 import { renderReview } from '../../src/review/render.js';
 import { sampleYear } from '../../src/demo/sample.js';
 import { DECORATIONS, decorationFor } from '../../src/activity/seasons.js';
-import { WEATHER_STATES, parseWeatherInput } from '../../src/weather/conditions.js';
-import { fetchWeather } from '../../src/weather/open-meteo.js';
-import { JALISCO_PLACES } from '../../src/weather/places.js';
+import { WEATHER_STATES, parseWeatherInput, skyOfReading } from '../../src/weather/conditions.js';
+import { fetchLiveWeather } from '../../src/weather/live.js';
+import { JALISCO_PLACES, placesFor } from '../../src/weather/places.js';
 import { localTheme } from '../../src/weather/sun.js';
 
 /** Dynamic page IDs address mixed form and image elements. @returns {any} */
@@ -32,6 +32,7 @@ $('train').innerHTML = '<option value="auto">Auto (evolves with the cars)</optio
 $('skyline').innerHTML = '<option value="city">City (procedural, unique per user)</option>' +
   Object.entries(SKYLINES).map(([id, s]) => `<option value="${id}">${s.name}</option>`).join('') +
   '<option value="jalisco">Jalisco · Guadalajara, Los Altos, Tequila</option>' +
+  '<option value="jalisco-sayula">Jalisco · Guadalajara, Sayula, Tequila</option>' +
   '<option value="custom">Your skyline (JSON, below)</option>';
 const langNames = Object.keys(LANGUAGE_COLORS);
 $('lang').innerHTML = langNames.map((n) => `<option>${n}</option>`).join('');
@@ -71,23 +72,48 @@ function fillJump() {
 $('weather').innerHTML = '<option value="off">Off · seasons as usual</option>' +
   '<option value="live">Live · current weather from Open-Meteo</option>' +
   WEATHER_STATES.map((s) => `<option value="${s}">${s[0].toUpperCase() + s.slice(1)} in every place</option>`).join('') +
+  '<option value="rain+wind">Rain with wind</option><option value="clear+wind">Clear with wind</option>' +
+  '<option value="clear+haze">Clear with haze</option>' +
   '<option value="cloudy,rain,storm">Mixed · cloudy, rain, storm</option>';
+const liveForecasts = new Map();
 let liveWeather = null;
-async function readLiveWeather() {
-  $('st-weather').className = 'status';
-  $('st-weather').textContent = 'Asking Open-Meteo…';
+async function readLiveWeather(route) {
+  const { places, airQuality } = await fetchLiveWeather({ places: route, fetchImpl: fetch });
+  const quality = airQuality.pm25 === null ? 'air quality unavailable' : `PM2.5 ${airQuality.pm25} µg/m³`;
+  const summary = route.map((place, i) => {
+    const { state, temperature } = places[i];
+    return `${place.name}: ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}${i === 0 ? ', ' + quality : ''}`;
+  }).join(' · ');
+  return { sky: places.map(skyOfReading), summary };
+}
+
+// A late response for one route must never label the other route's middle track.
+async function updateWeather() {
+  const route = placesFor(pickedSkyline()) ?? JALISCO_PLACES;
+  const status = $('st-weather');
+  liveWeather = null;
+  status.className = 'status';
+  status.textContent = '';
+  render();
+  if ($('weather').value !== 'live') return;
+  status.textContent = 'Asking Open-Meteo…';
+  if (!liveForecasts.has(route)) {
+    liveForecasts.set(route, readLiveWeather(route).catch((err) => {
+      liveForecasts.delete(route);
+      throw err;
+    }));
+  }
+  const selected = () => $('weather').value === 'live' && (placesFor(pickedSkyline()) ?? JALISCO_PLACES) === route;
   try {
-    const { places } = await fetchWeather({ places: JALISCO_PLACES, fetchImpl: (url, init) => fetch(url, init) });
-    liveWeather = places.map((p) => p.state);
-    $('st-weather').className = 'status ok';
-    $('st-weather').textContent = JALISCO_PLACES.map((place, i) => {
-      const { state, temperature } = places[i];
-      return `${place.name}: ${state ?? 'unknown'}${temperature === null ? '' : ` ${Math.round(temperature)}°C`}`;
-    }).join(' · ');
+    const { sky, summary } = await liveForecasts.get(route);
+    if (!selected()) return;
+    liveWeather = sky;
+    status.className = 'status ok';
+    status.textContent = summary;
   } catch (err) {
-    liveWeather = null;
-    $('st-weather').className = 'status bad';
-    $('st-weather').textContent = `Could not read the weather: ${err.message}`;
+    if (!selected()) return;
+    status.className = 'status bad';
+    status.textContent = `Could not read the weather: ${err.message}`;
   }
   render();
 }
@@ -201,7 +227,8 @@ document.addEventListener('click', async (e) => {
 function onEdit(kind) {
   readEditor(kind);
   if (custom[kind].value) $(kind).value = 'custom';
-  render();
+  if (kind === 'skyline') updateWeather();
+  else render();
 }
 for (const kind of ['train', 'skyline']) {
   $(`json-${kind}`).value = store.get(`git-trains:${kind}`) ?? store.get(OLD_KEYS[kind]) ?? '';
@@ -289,7 +316,7 @@ function gallery() {
 
 for (const id of ['total', 'streak', 'yesterday', 'user']) $(id).addEventListener('input', () => { render(); });
 $('train').addEventListener('change', render);
-$('skyline').addEventListener('change', render);
+$('skyline').addEventListener('change', updateWeather);
 $('lang').addEventListener('change', () => { render(); gallery(); });
 seg('mode', 'mode', render);
 seg('theme', 'theme', render);
@@ -298,10 +325,7 @@ seg('doors', 'doors', render);
 seg('hemisphere', 'hemisphere', () => { fillJump(); render(); });
 $('day').addEventListener('input', () => { fillJump(); render(); });
 $('today').addEventListener('click', () => { $('day').value = todayUtc(); fillJump(); render(); });
-$('weather').addEventListener('change', () => {
-  if ($('weather').value === 'live' && !liveWeather) readLiveWeather();
-  else render();
-});
+$('weather').addEventListener('change', updateWeather);
 $('jump').addEventListener('change', () => { if (!$('jump').value) return; $('day').value = $('jump').value; fillJump(); render(); });
 fillJump();
 gallery(); render();
